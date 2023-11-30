@@ -17,7 +17,6 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 
-
 // Диалоговое окно CAboutDlg используется для описания сведений о приложении
 
 class CAboutDlg : public CDialogEx
