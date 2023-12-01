@@ -203,245 +203,191 @@ void CCalculatorDlg::addDigit(char symbol)
 void CCalculatorDlg::OnBnClickedButton0()
 {
 	addDigit('0');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButton1()
 {
 	addDigit('1');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButton2()
 {
 	addDigit('2');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButton3()
 {
 	addDigit('3');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButton4()
 {
 	addDigit('4');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButton5()
 {
 	addDigit('5');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButton6()
 {
 	addDigit('6');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButton7()
 {
 	addDigit('7');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButton8()
 {
 	addDigit('8');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButton9()
 {
 	addDigit('9');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButtonPlus()
 {
 	addDigit('+');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButtonMinus()
 {
 	addDigit('-');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButtonMul()
 {
 	addDigit('*');
-	// TODO: добавьте свой код обработчика уведомлений
 }
 
 
 void CCalculatorDlg::OnBnClickedButtonDivide()
 {
 	addDigit('/');
-	// TODO: добавьте свой код обработчика уведомлений
+}
+bool isOperator(char c) {
+	return (c == '+' || c == '-' || c == '*' || c == '/');
 }
 
-struct Leksema
-{
-	char type;
-	double value;
-
-};
-
-void Maths(stack<Leksema>& StackN, stack <Leksema>& StackO, Leksema& item)
-{
-
-	double firstNumber, secondNumber, res;
-	
-	firstNumber = StackN.top().value;
-	StackN.pop();
-
-	switch (StackO.top().type)
-	{
-		case '+':
-			secondNumber = StackN.top().value;
-			StackN.pop();
-			res = firstNumber + secondNumber;
-			item.type = '0';
-			item.value = res;
-			StackN.push(item);
-			StackO.pop();
-			break;
-
-		case '-':
-			secondNumber = StackN.top().value;
-			StackN.pop();
-			res = secondNumber - firstNumber;
-			item.type = '0';
-			item.value = res;
-			StackN.push(item);
-			StackO.pop();
-			break;
-
-		case '*':
-			secondNumber = StackN.top().value;
-			StackN.pop();
-			res = firstNumber * secondNumber;
-			item.type = '0';
-			item.value = res;
-			StackN.push(item);
-			StackO.pop();
-			break;
-
-		case '/':
-			secondNumber = StackN.top().value;
-			StackN.pop();
-			res = secondNumber / firstNumber;
-			item.type = '0';
-			item.value = res;
-			StackN.push(item);
-			StackO.pop();
-			break;
+int getPrecedence(char op) {
+	if (op == '+' || op == '-') {
+		return 1;
 	}
-
-}
-
-int getRang(char ch)
-{
-	if (ch == '+' || ch == '-')return 1;
-	if (ch == '*' || ch == '/')return 2;
+	else if (op == '*' || op == '/') {
+		return 2;
+	}
 	return 0;
 }
 
+CString infixToPostfix(const CString& infix) {
+	stack<char> operators;
+	CString postfix;
+	CString numStr;
+
+	for (int i = 0; i < infix.GetLength(); ++i) {
+		char c = infix.GetAt(i);//берем символ
+		if (isdigit(c)) {
+			numStr += c;
+		}
+		else if (isOperator(c)) {
+			if (!numStr.IsEmpty()) {
+				postfix += numStr;
+				postfix += ' ';
+				numStr.Empty();
+			}
+
+			while (!operators.empty() && getPrecedence(operators.top()) >= getPrecedence(c)) {
+				postfix += operators.top();
+				postfix += ' ';  
+				operators.pop();
+			}
+			operators.push(c);
+		}
+	}
+
+	if (!numStr.IsEmpty()) {
+		postfix += numStr;
+		postfix += ' '; 
+	}
+
+	while (!operators.empty()) {
+		postfix += operators.top();
+		postfix += ' ';  
+		operators.pop();
+	}
+
+	return postfix;
+}
+
+double evaluatePostfix(const CString& postfix) {
+	stack<double> operands;
+	CString numStr;
+
+	for (int i = 0; i < postfix.GetLength(); ++i) {
+		char c = postfix.GetAt(i);
+		if (isdigit(c)) {
+			numStr += c;
+		}
+		else if (c == ' ') {
+			if (!numStr.IsEmpty()) {
+				operands.push(_ttof((LPCTSTR)numStr));
+				numStr.Empty();
+			}
+		}
+		else if (isOperator(c)) {
+			double operand2 = operands.top();
+			operands.pop();
+			double operand1 = operands.top();
+			operands.pop();
+
+			switch (c) {
+			case '+':
+				operands.push(operand1 + operand2);
+				break;
+			case '-':
+				operands.push(operand1 - operand2);
+				break;
+			case '*':
+				operands.push(operand1 * operand2);
+				break;
+			case '/':
+				operands.push(operand1 / operand2);
+				break;
+			}
+		}
+	}
+
+	return operands.top();
+}
 double solve(CString input)
 {
 
-	stack <Leksema> StackN;
-	stack <Leksema> StackO;
-	Leksema item;
-	CString number;
 
-	for (int i = 0; i < input.GetLength(); i++)
-	{
+	CString postfix = infixToPostfix(input);
+	double result = evaluatePostfix(postfix);
 
-
-		if (input[i] >= '0' && input[i] <= '9')
-		{
-			number += input[i];//собираем число
-			if (input.GetLength()-1 == i)
-			{
-				item.type = '0';
-				item.value = _tstof(number);//добавляем последнее число в стек, потому что оно не будет добавлено в else
-
-				number.Empty();
-				StackN.push(item);
-				
-			}
-		}
-		else
-		{
-
-			/*AfxMessageBox(number);*/
-			item.type = '0';
-			item.value = _tstof(number);//добавляем собранное число
-			StackN.push(item);
-
-			number.Empty();//очищаем строку для дальнейшей сборки числа
-			
-
-
-			if (StackO.size() >= 1 && StackN.size() >= 2 && getRang(input[i]) <= getRang(StackO.top().type))
-			{
-				Maths(StackN, StackO, item);
-			}
-
-			
-			item.type = input[i];
-			item.value = 0;
-			StackO.push(item);
-
-			/*CString cs;
-			cs.Format(_T("StackN.top().value: %f, StackO.top().value: %f\n"), StackN.top().value, StackO.top().value);
-			OutputDebugString(cs);*/
-			
-		}
-		
-	}
-
-	while (StackO.size() >=1)
-	{
-		Maths(StackN, StackO, item);
-	}
-	
-	return StackN.top().value;
+	return result;
 }
 
 void CCalculatorDlg::OnBnClickedButtonEquals()
 {
-	//regex str("\\d+([+\\-*/]\\d+)*");
-
-	//string tmp = "";
-	//int len = output.GetLength();
-	//tmp.resize(len);
-	//for (int i = 0; i < len; ++i) {
-	//	tmp[i] = output.GetAt(i);
-	//}
-
-	//// Проверяем, соответствует ли строка регулярному выражению
-	//if (regex_match(tmp, str)) {
-	//	CheckToDo = true;
-	//}
 
 	CString expression = output;
 	expression += '=';
@@ -464,12 +410,7 @@ void CCalculatorDlg::OnBnClickedButtonEquals()
 			expression += result;
 			out->SetWindowText(expression);
 
-			//AfxMessageBox(result);
-
 		}
-
-	
-
 	
 } 
 
